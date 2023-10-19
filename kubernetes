@@ -1,0 +1,98 @@
+docker
+=========================
+
+sudo yum install -y yum-utils
+sudo yum-config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+
+sudo yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+sudo systemctl start docker
+sudo systemctl enable  docker
+
+=============================================
+
+kubernetes
+
+===========================================================================
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
+
+
+sudo setenforce 0
+sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+
+
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/repodata/repomd.xml.key
+exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+EOF
+
+
+
+sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+sudo systemctl enable --now kubelet
+
+============================================================================
+rm /etc/containerd/config.toml
+systemctl restart containerd
+echo "1" > /proc/sys/net/ipv4/ip_forward
+modprobe bridge
+modprobe br_netfilter
+
+============================================================================
+pod network
+
+
+
+https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart
+
+
+
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+
+they will give token copy token paste in slvae 
+
+
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+or 
+cd 
+vi .bashrc
+=======
+export KUBECONFIG=/etc/kubernetes/admin.conf
+=====
+mkdir .kube
+cp /etc/kubernetes/admin.conf .kube/config
+
+=========================================================
+check now
+
+kubectl get node 
+
+
+
+==================================================
+
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/tigera-operator.yaml
+
+
+
+
+
+
+
+
+
+
+
